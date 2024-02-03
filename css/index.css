@@ -1,0 +1,96 @@
+@font-face
+{
+    font-family: Inter;
+    src: url(../Inter-VariableFont_slnt\,wght.ttf);
+}
+
+
+
+.information-center
+{
+    margin-top: 10vh;
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.info-header
+{
+    height: 8vh;
+    width: 100%;
+    background-color: wheat;
+    color: black;
+    font-family: Inter;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    font-weight: 800;
+}
+
+.body
+{
+    display: flex;
+    align-items: center;
+}
+
+.info-section
+{
+    margin-top: 3vh;
+    padding: 2vh;
+    font-size: 22px;
+    height: fit-content;
+    background-color: #0B0E11;
+    color: wheat;
+}
+
+.button-section
+{
+    width: 100%;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 2vw;
+    padding: 3vh 0;
+    height: 12vh;
+}
+
+.tool-button
+{
+    border-color: #bb9a5b;
+    color: wheat;
+}
+
+.tool-button:hover
+{
+    color: white;
+}
+
+@media (max-width: 480px)
+{
+    .information-center
+    {
+        margin-top: 0vh;
+        width: 74%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .info-section
+    {
+        font-size: 18px;
+    }
+
+    .info-header
+    {
+        font-size: 23px;
+    }
+
+    .tool-button
+    {
+        font-size: 18px;
+    }
+}
