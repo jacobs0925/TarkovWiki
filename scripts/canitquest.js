@@ -207,8 +207,8 @@ function loadItemsInDOM()
         element.addEventListener('mouseout', (event) =>
         {
             event.stopPropagation()
-            tooltip.style.color = ''
             const tooltip = document.querySelector('.custom-tooltip');
+            tooltip.style.color = ''
             tooltip.style.visibility = 'hidden';
             tooltip.style.opacity = '0';
         });
