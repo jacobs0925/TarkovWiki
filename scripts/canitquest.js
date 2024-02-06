@@ -141,26 +141,54 @@ let tooltip = document.createElement('div')
 document.body.appendChild(tooltip)
 tooltip.className = "custom-tooltip"
 let itemsMap = await loadItemData()
-loadRelevantItems('a')
+let itemElementMap = new Map()
+loadItemsInDOM()
+updateGridItemSizes()
 
-function loadRelevantItems(query)
+loadRelevantItems('a')
+function clearGrid()
 {
-    let items = searchAlphaSortedMap(itemsMap, query)
-    gridContainer.innerHTML = ''
-    for (let index in items)
+    let hidden = document.getElementById('hidden-grid-elements')
+    if (gridContainer.children.length > 0)
     {
-        let item = items[index]
+        for (let index in gridContainer.children)
+        {
+            let element = gridContainer.children[index]
+            if (element instanceof HTMLElement)
+            {
+                // console.log(hidden)
+                // console.log(element)
+
+                hidden.appendChild(element)
+            }
+        }
+    }
+    gridContainer.innerHTML = ""
+}
+
+function loadItemsInDOM()
+{
+    for (let index in itemsMap)
+    {
+        let item = itemsMap[index]
+
         let element = document.createElement('div')
         element.className = 'grid-element'
         element.setAttribute('itemname', item['name'])
         element.setAttribute('itemid', item['id'])
 
         let pic = document.createElement('img')
+        document.body.appendChild(pic)
         pic.className = 'grid-image'
         pic.src = item['gridImageLink']
 
+
+        const gridColumnSpan = Math.ceil(pic.clientWidth / (64));
+        const gridRowSpan = Math.ceil(pic.clientHeight / (64));
+
+        element.style.gridRow = `span ${gridRowSpan}`;
+        element.style.gridColumn = `span ${gridColumnSpan}`;
         element.appendChild(pic)
-        gridContainer.appendChild(element)
 
         element.addEventListener('mouseover', (event) =>
         {
@@ -181,7 +209,6 @@ function loadRelevantItems(query)
             event.stopPropagation()
             tooltip.style.color = ''
             const tooltip = document.querySelector('.custom-tooltip');
-            console.log('out')
             tooltip.style.visibility = 'hidden';
             tooltip.style.opacity = '0';
         });
@@ -203,10 +230,45 @@ function loadRelevantItems(query)
                 tooltip.style.color = '#e90b2a'
             }
         })
+        itemElementMap[item['id']] = element
     }
 }
+
+function loadRelevantItems(query)
+{
+    if (query != '')
+    {
+        let items = searchAlphaSortedMap(itemsMap, query)
+        clearGrid()
+        for (let index in items)
+        {
+            let item = items[index]
+
+            let element = itemElementMap[item['id']]
+            gridContainer.appendChild(element)
+
+        }
+    }
+}
+
+
+function updateGridItemSizes()
+{
+    const gridItems = document.querySelectorAll('.grid-element');
+    gridItems.forEach(item =>
+    {
+        const rect = item.getBoundingClientRect();
+        const gridColumnSpan = Math.ceil(rect.width / (64 + 10));
+        const gridRowSpan = Math.ceil(rect.height / (64 + 10));
+
+        item.style.gridRow = `span ${gridRowSpan}`;
+        item.style.gridColumn = `span ${gridColumnSpan}`;
+    });
+}
+
 
 input.addEventListener('input', function ()
 {
     loadRelevantItems(input.value)
+
 })
