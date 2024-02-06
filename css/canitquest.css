@@ -85,7 +85,10 @@
 
 .hidden-grid-elements
 {
-    display: none;
+    visibility: hidden;
+    overflow: hidden;
+    width: 0vh;
+    height: 0vh;
 }
 
 @media (max-width: 480px)

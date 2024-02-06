@@ -1,3 +1,7 @@
+// SETTINGS
+const MAX_RESULTS = 60
+
+
 async function loadItemData()
 {
     const cachedData = localStorage.getItem('cachedItemData');
@@ -6,6 +10,7 @@ async function loadItemData()
 
     if (cachedData && cachedTimestamp && currentTime - cachedTimestamp < 24 * 60 * 60 * 1000)
     {
+        console.log(cachedData)
         return JSON.parse(cachedData);
     }
 
@@ -50,22 +55,11 @@ async function loadItemData()
     let itemsMap = data['data']['items']
     itemsMap.sort((a, b) => a.name.localeCompare(b.name));
 
-    let fetch3 = await fetch('https://api.tarkov.dev/graphql', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify({
-            query: `{
-    tasks {
-        id
-    }
-}`})
-    })
     localStorage.setItem('cachedItemData', JSON.stringify(itemsMap));
     localStorage.setItem('cachedTimestamp', currentTime);
 
+    console.log(JSON.parse(JSON.stringify(itemsMap)))
+    itemsMap = JSON.parse(JSON.stringify(itemsMap))
     return itemsMap
 }
 
@@ -138,14 +132,22 @@ function searchAlphaSortedMap(itemMap, target)
 let input = document.getElementById('input')
 let gridContainer = document.getElementById('grid-container')
 let tooltip = document.createElement('div')
-document.body.appendChild(tooltip)
-tooltip.className = "custom-tooltip"
-let itemsMap = await loadItemData()
 let itemElementMap = new Map()
-loadItemsInDOM()
-updateGridItemSizes()
+tooltip.className = "custom-tooltip"
+document.body.appendChild(tooltip)
+let itemsMap = await loadItemData()
+window.onload = function () 
+{
+    loadItemsInDOM()
+    loadRelevantItems('a')
 
-loadRelevantItems('a')
+    input.addEventListener('input', function ()
+    {
+        loadRelevantItems(input.value)
+
+    })
+}
+
 function clearGrid()
 {
     let hidden = document.getElementById('hidden-grid-elements')
@@ -182,13 +184,16 @@ function loadItemsInDOM()
         pic.className = 'grid-image'
         pic.src = item['gridImageLink']
 
+        element.appendChild(pic);
+        gridContainer.appendChild(element);
+        if (index == itemsMap.length - 1 || index == MAX_RESULTS - 1)
+        {
 
-        const gridColumnSpan = Math.ceil(pic.clientWidth / (64));
-        const gridRowSpan = Math.ceil(pic.clientHeight / (64));
-
-        element.style.gridRow = `span ${gridRowSpan}`;
-        element.style.gridColumn = `span ${gridColumnSpan}`;
-        element.appendChild(pic)
+            pic.addEventListener('load', function ()
+            {
+                updateGridItemSizes();
+            });
+        }
 
         element.addEventListener('mouseover', (event) =>
         {
@@ -231,6 +236,7 @@ function loadItemsInDOM()
             }
         })
         itemElementMap[item['id']] = element
+        gridContainer.appendChild(element)
     }
 }
 
@@ -240,7 +246,7 @@ function loadRelevantItems(query)
     {
         let items = searchAlphaSortedMap(itemsMap, query)
         clearGrid()
-        for (let index in items)
+        for (let index in items.slice(0, MAX_RESULTS))
         {
             let item = items[index]
 
@@ -248,27 +254,29 @@ function loadRelevantItems(query)
             gridContainer.appendChild(element)
 
         }
+        updateGridItemSizes()
     }
+
 }
 
 
 function updateGridItemSizes()
 {
-    const gridItems = document.querySelectorAll('.grid-element');
-    gridItems.forEach(item =>
+    const gridItems = gridContainer.children
+    for (let index in gridItems)
     {
-        const rect = item.getBoundingClientRect();
-        const gridColumnSpan = Math.ceil(rect.width / (64 + 10));
-        const gridRowSpan = Math.ceil(rect.height / (64 + 10));
+        let item = gridItems[index]
+        if (item instanceof HTMLElement)
+        {
+            item.style.display = 'block'
+            const rect = item.getBoundingClientRect();
 
-        item.style.gridRow = `span ${gridRowSpan}`;
-        item.style.gridColumn = `span ${gridColumnSpan}`;
-    });
+            console.log(item.clientHeight, rect.width)
+            const gridColumnSpan = Math.ceil(item.clientWidth / (64 + 10));
+            const gridRowSpan = Math.ceil(item.clientHeight / (64 + 10));
+
+            item.style.gridRow = `span ${gridRowSpan}`;
+            item.style.gridColumn = `span ${gridColumnSpan}`;
+        }
+    }
 }
-
-
-input.addEventListener('input', function ()
-{
-    loadRelevantItems(input.value)
-
-})
